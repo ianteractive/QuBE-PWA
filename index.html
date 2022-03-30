@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QuBE: Quality Board for Educators</title>
+    <link rel="stylesheet" href="index.css">
+    <script src="index.js"></script>
+
+    <link rel="stylesheet" href="calculator.css" class="rel">
+
+    <!-- google fonts link -->
+
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet">
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="img/QLogo192.png">
+    <link rel="icon" href="favicon.ico">
+    
+</head>
+<body>
+    <header class="site-header">
+        <div class="wrapper site-header__wrapper">
+          <nav class="nav">
+            <button class="nav__toggle" aria-expanded="false" type="button">
+              Tools
+            </button>
+            <button class="nav__toggle1" aria-expanded="false" type="button">
+              Calculator
+            </button>
+          </nav>
+          <a href="Qube.html" class="brand">QuBE: Quality Board for Educators</a>
+            <button class="nav__toggle2" aria-expanded="false" type="button">
+              Formulas
+            </button>
+        </div>
+      </header>
+    <canvas id="canvas" width="1200" height="600"></canvas>
+    <!--<img id="try1" src="try2.png">-->
+      
+    <div id="controls">
+        
+
+        <div class="lightBorder">
+            <p><label>Line Width<input id="lineWidth" type="range" step="1" min="1" max="200" value="4" onInput="lineWid = this.value"></label></p>
+            <p><input type="radio" name="lineCap" value="round" checked="checked" >Round</p>
+            <p><input type="radio" name="lineCap" value="square">Square</p>
+            
+            
+        </div>
+
+        <div class="lightBorder">
+            <p><label>Fill: <input id="fillBox" type="checkbox"></label></p>
+            <p><label>Fill Color : <input id="fillColor" type="color" value="#24B0D5"></label></p>
+            <p><input id="eraserColor" onInput="eraser = this.value" type="color" value="#ffffff"></p>
+            <p><label>Stroke Color : <input id="strokeColor" onInput="dColor = this.value" type="color"></label></p>
+        </div>
+
+        <div class="lightBorder">
+            <p><input type="radio" name="shape" value="free" checked="checked">Pen</p>
+            <p><input type="radio" name="shape" value="eraser">Eraser</p>
+            <p><input type="radio" name="shape" value="line">Line</p>
+            <p><input type="radio" name="shape" value="circle">Circle</p>
+            <p><input type="radio" name="shape" value="polygon">Polygon</p>
+            <!--<p><input type="radio" name="shape" value="formula"><img id="try1" src="try2.png">Formula</p>-->
+            <p><input type="radio" name="shape" value="ruler"><img id="ruler" src="img/Ruler.png">Ruler Down</p>
+            <p><input type="radio" name="shape" value="ruler1"><img id="ruler1" src="img/Ruler1.png">Ruler Up</p>
+        </div>
+
+        <p><label>Polygon Sides <input id="polygonSides" type="range" step="1" min="3" max="10"></label></p>
+        <p><label>Polygon Angle <input id="polygonAngle" type="range" step="22.5" min="0" max="90"></label></p>
+
+        <p><input id="undo" type="button" value="Undo"></p>
+        <p><input id="clearCanvas" type="button" value="Clear Canvas"></p>
+        <p><input id="save" type="button" value="Save Canvas"></p>
+        
+        
+        
+
+    </div>
+
+    <!--- CALCULATOR  -->
+    <div id="calculator">
+      <div class="calculator">
+        <div class="calc-container">
+
+          <!-- this the output window ↓ -->
+          <div class="output">
+              <div class="operation">
+                  <div class="value"></div>
+              </div>
+              <div class="result">
+                  <div class="value">0</div>
+              </div>
+          </div>
+
+          <!-- output div ends here -->
+          <div class="input">
+
+          </div>
+        </div>
+    </div>
+  </div>
+
+      <div id="formulaNav">
+        <div class="lightborder">
+          <button class="nav__toggle4" aria-expanded="false" type="button">
+            Planes
+          </button>
+          <button class="nav__toggle5" aria-expanded="false" type="button">
+            Calculus
+          </button>
+          <button class="nav__toggle6" aria-expanded="false" type="button">
+            Fundamentals of Computing
+          </button>
+          <button class="nav__toggle7" aria-expanded="false" type="button">
+            Fundamentals Concepts of Math
+          </button>
+          <button class="nav__toggle8" aria-expanded="false" type="button">
+            Statistics
+          </button>
+        </div>
+      </div>
+
+  <!--- FORMULAS  -->
+    <div id="formulaControls">
+      <div class="lightBorder">
+        <label id="nameForm">Planes</label>
+        <p><input type="radio" name="shape" value="3d"><img id="try3" src="Planes/3d.png">3D Coordinate</p>
+        <p><input type="radio" name="shape" value="formula2"><img id="try2" src="Planes/cp.png">Cartesian</p>
+        <p><input type="radio" name="shape" value="cpgl"><img id="try4" src="Planes/cpgl.png">Cartesian 2</p>
+        <p><input type="radio" name="shape" value="nl"><img id="try5" src="Planes/nl.png">Number Line</p>
+        <p><input type="radio" name="shape" value="pc30"><img id="try6" src="Planes/pc30.png">Polar Coordinate 30&#176</p>
+    </div>
+    </div>
+    
+    <div id="formulaCalcu">
+      <div class="lightBorder">
+        <label id="nameForm">Calculus</label>
+        <p><input type="radio" name="shape" value="Deri"><img id="try7" src="Calculus/Deri.png">Derivatives</p>
+        <p><input type="radio" name="shape" value="sincos"><img id="try8" src="Calculus/sincos.png">Sin Cos</p>
+        <p><input type="radio" name="shape" value="DI"><img id="try9" src="Calculus/DI.png">Differential Integral</p>
+        <p><input type="radio" name="shape" value="IE"><img id="try10" src="Calculus/IE.png">Integral Equation</p>
+        <p><input type="radio" name="shape" value="TIC"><img id="try11" src="Calculus/TIC.png">Theorem Integral</p>
+    </div>
+    </div>
+
+
+
+
+
+
+    <script src="calculator.js"></script>
+    <script src="cTable.js"></script>
+    <script src="button.js"></script>
+</body>
+</html>
