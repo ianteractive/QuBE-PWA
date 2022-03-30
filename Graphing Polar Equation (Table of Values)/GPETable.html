@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Graphing Polar Equation (Table)</title>
+
+    <style type="text/css">
+        body{
+            font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        ion-icon{
+            cursor: pointer;
+            font-size: 19px;
+            color:rgb(60, 95, 24);
+        }
+        .button-comp{
+            width:98.5%;
+            height: 100px;
+            background: rgb(131, 204, 204);
+            box-shadow: 0 0 10px rgba(0, 0, 0, 1);
+            border-radius: 0.5em;
+            padding: 5px;
+            border: black solid 1px;
+            position: absolute;
+            place-items: center;
+            display: none;
+            margin-top: -15px;
+        }
+        button{
+            margin-top: 14px;
+            margin-left: 185px;
+            position:relative;
+            text-align: center;
+            box-shadow: 0px 4px 12px -4px rgba(0,0,0,0.35);
+            padding: 20px;
+            border: 1px #ffffff;
+            background-color: rgb(131, 204, 204);
+            cursor: pointer;
+            font-size:15px;
+        }
+        button:hover, button:focus, button:active{
+            box-shadow: 0 0 10px rgba(0,0,0,0.5);
+            -webkit-transform: scale(1.1);
+            transform: scale(1.1);
+        }
+        .hi{
+            margin-left: 125px;
+            width: 80%;
+            position: absolute;
+            display: none;
+        }
+        .hi1{
+            width: 98.5%;
+            position: absolute;
+            display: none;
+        }
+        #btnss{
+            margin-top: 140px;
+            position:absolute;
+            display: none;
+        }
+        .d-o{
+            position:absolute;
+            margin-left: 8px;
+        }
+        canvas {
+            margin-top: 200px;
+        }
+        .tools {
+            justify-content: center;
+            margin-top: 25px;
+        }
+        .tools .color-field {
+            height: 40px;
+            width: 40px;
+            min-width: 40px;
+            min-height: 40px;
+            cursor: pointer;
+            display: inline-block;
+            box-sizing: border-box;
+            border-radius: 50%;
+            border: 2px solid white;
+        }
+        .tools .button {
+            align-self: center;
+            width: 100px;
+            height: 40px;
+            border: 2px solid #222;
+            cursor: pointer;
+            color: white;
+            background: teal;
+            margin: 5px;
+        }
+        a {
+            text-decoration: none;
+            color: #fff;
+            cursor: pointer;
+            padding: 10px 10px;
+        }
+    </style>
+</head>
+<body>
+    <p><big>Graphing Polar Equation (Table of Values)</big>
+        &nbsp;
+        <ion-icon class="icn" name="chevron-down-circle-outline" onclick="menu1()"></ion-icon>
+        <hr>
+    </p>
+
+            <img src="D30.jpg" alt="" class="hi" id="d30">
+            <img src="D24.jpg" alt="" class="hi1" id="d24">
+            <img src="R30.jpg" alt="" class="hi" id="r30">
+            <img src="R24.jpg" alt="" class="hi1" id="r24">
+            
+
+
+        <div id="btnss">
+        Download
+        <ion-icon name="download-outline" id="dd30" class="d-o"></ion-icon>
+        <ion-icon name="download-outline" id="dd24" class="d-o"></ion-icon>
+        <ion-icon name="download-outline" id="dr30" class="d-o"></ion-icon>
+        <ion-icon name="download-outline" id="dr24" class="d-o"></ion-icon>
+        </div>
+    
+
+    <div class="button-comp" id="btn-comp">
+        <button onclick="D30()">Degree Form<br>30°</button>
+        <button onclick="D24()">Degree Form<br>24°</button>
+        <button onclick="R30()">Radian Form<br>30°</button>
+        <button onclick="R24()">Radian Form<br>24°</button>
+    </div>
+    <p id="choose">Choose from 24°/30° interval and degree/radian form</p>
+    <canvas id="canvas"></canvas>
+       <label for="uploader">Select File</label>
+       <input type="file" id="uploader">
+       <div class="tools">
+            <button onClick="undo_last()" type="button" class="button">Undo</button>
+            <button onClick="clear_canvas()" type="button" class="button">Clear</button>
+            <button class="button"><a href="../Qube.html">Home</a></button>
+
+            <div onClick="change_color(this)" class="color-field" style="background: black;"></div>
+            <div onClick="change_color(this)" class="color-field" style="background: blue;"></div>
+            <div onClick="change_color(this)" class="color-field" style="background: red;"></div>
+            <div onClick="change_color(this)" class="color-field" style="background: white; border: 1px solid #222; border-radius: 3px;"></div>
+
+            <input onInput="draw_color = this.value" type="color" class="color-picker">
+            <input onInput="draw_width = this.value" type="range" min="1" max="10" value="2" class="pen-range">
+       </div>
+
+    
+
+    <script>
+        const canvas = document.getElementById('canvas');
+           const ctx = canvas.getContext('2d');
+
+           const reader = new FileReader();
+           const img = new Image();
+
+           const uploadImage = (e) => {
+               reader.onload = () => {
+                   img.onload = () => {
+                       canvas.width = img.width;
+                       canvas.height = img.height;
+                       ctx.drawImage(img, 0, 0);
+                   };
+                   img.src = reader.result;
+               };
+               reader.readAsDataURL(e.target.files[0])
+           };
+           const imageLoader = document.getElementById('uploader');
+           imageLoader.addEventListener('change', uploadImage); 
+
+           let draw_color = "black";
+           let draw_width = "2";
+           let is_drawing = false;
+
+           let restore_array = [];
+           let index = -1;
+
+           canvas.addEventListener("touchstart", start, false);
+           canvas.addEventListener("touchmove", draw, false);
+           canvas.addEventListener("mousedown", start, false);
+           canvas.addEventListener("mousemove", draw, false);
+           
+           canvas.addEventListener("touchend", stop, false);
+           canvas.addEventListener("mouseup", stop, false);
+           canvas.addEventListener("mouseout", stop, false);
+
+
+
+           function start(event) {
+               is_drawing = true;
+               ctx.beginPath();
+               ctx.moveTo(event.clientX - canvas.offsetLeft, event.clientY - canvas.offsetTop);
+               event.preventDefault();
+           }
+
+           function draw(event){
+               if(is_drawing) {
+                   ctx.lineTo(event.clientX - canvas.offsetLeft, event.clientY - canvas.offsetTop);
+                   ctx.strokeStyle = draw_color;
+                   ctx.lineWidth = draw_width;
+                   ctx.lineCap = "round";
+                   ctx.lineJoin = "round";
+                   ctx.stroke();
+               }
+           }
+
+           function stop(event) {
+               if(is_drawing){
+                   ctx.stroke();
+                   ctx.closePath();
+                   is_drawing = false;
+               }
+               event.preventDefault();
+            
+               if(event.type != 'mouseout'){
+                restore_array.push(ctx.getImageData(0, 0, canvas.width, canvas.height));
+                index += 1;
+               }
+               
+           }
+
+           function change_color(element) {
+                draw_color =element.style.background;
+           }
+
+           function clear_canvas(){
+               ctx.clearRect(0, 0, canvas.width, canvas.height);
+               restore_array = [];
+               index = -1;
+               document.location.reload(true);
+           }
+
+           function undo_last(){
+                if( index <= 0 ){
+                    clear_canvas();
+                } else {
+                    index -= 1;
+                    restore_array.pop();
+                    ctx.putImageData(restore_array[index], 0, 0);
+                }
+           }
+        function D30(){
+            document.getElementById("choose").style.display="none";
+            document.getElementById("d30").style.display="inline";
+            document.getElementById("d24").style.display="none";
+            document.getElementById("r30").style.display="none";
+            document.getElementById("r24").style.display="none";
+            document.getElementById("dd30").style.display="inline";
+            document.getElementById("dd24").style.display="none";
+            document.getElementById("dr30").style.display="none";
+            document.getElementById("dr24").style.display="none";
+            document.getElementById("btn-comp").style.display="none";
+            document.getElementById("btnss").style.display="inline";
+            return a=0;
+
+        }
+        function D24(){
+            document.getElementById("choose").style.display="none";
+            document.getElementById("d30").style.display="none";
+            document.getElementById("d24").style.display="inline";
+            document.getElementById("r30").style.display="none";
+            document.getElementById("r24").style.display="none";
+            document.getElementById("dd30").style.display="none";
+            document.getElementById("dd24").style.display="inline";
+            document.getElementById("dr30").style.display="none";
+            document.getElementById("dr24").style.display="none";
+            document.getElementById("btn-comp").style.display="none";
+            document.getElementById("btnss").style.display="inline";
+            return a=0;
+        }
+        function R30(){
+            document.getElementById("choose").style.display="none";
+            document.getElementById("d30").style.display="none";
+            document.getElementById("d24").style.display="none";
+            document.getElementById("r30").style.display="inline";
+            document.getElementById("r24").style.display="none";
+            document.getElementById("dd30").style.display="none";
+            document.getElementById("dd24").style.display="none";
+            document.getElementById("dr30").style.display="inline";
+            document.getElementById("dr24").style.display="none";
+            document.getElementById("btn-comp").style.display="none";
+            document.getElementById("btnss").style.display="inline";
+            return a=0;
+        }
+        function R24(){
+            document.getElementById("choose").style.display="none";
+            document.getElementById("d30").style.display="none";
+            document.getElementById("d24").style.display="none";
+            document.getElementById("r30").style.display="none";
+            document.getElementById("r24").style.display="inline";
+            document.getElementById("dd30").style.display="none";
+            document.getElementById("dd24").style.display="none";
+            document.getElementById("dr30").style.display="none";
+            document.getElementById("dr24").style.display="inline";
+            document.getElementById("btn-comp").style.display="none";
+            document.getElementById("btnss").style.display="inline";
+            return a=0;
+        }
+        let a=0;
+        function menu1(){
+            a+=1;
+            if (a==1){
+                document.getElementById("btn-comp").style.display="inline";
+                return a=1;
+            } else {
+                document.getElementById("btn-comp").style.display="none";
+                return a=0;
+            }
+        }
+        
+        document.getElementById("dd30").onclick = function (){
+          const screenshotTarget = document.getElementById('d30');
+
+          html2canvas(screenshotTarget).then((canvas)=> {
+              const base64image = canvas.toDataURL("image/png");
+              var anchor = document.createElement('a');
+              anchor.setAttribute("href", base64image);
+              anchor.setAttribute("download", "tableGPE1.png");
+              anchor.click();
+              anchor.remove();
+          });
+        };
+
+        document.getElementById("dd24").onclick = function (){
+          const screenshotTarget = document.getElementById('d24');
+
+          html2canvas(screenshotTarget).then((canvas)=> {
+              const base64image = canvas.toDataURL("image/png");
+              var anchor = document.createElement('a');
+              anchor.setAttribute("href", base64image);
+              anchor.setAttribute("download", "tableGPE2.png");
+              anchor.click();
+              anchor.remove();
+          });
+        };
+
+        document.getElementById("dr30").onclick = function (){
+          const screenshotTarget = document.getElementById('r30');
+
+          html2canvas(screenshotTarget).then((canvas)=> {
+              const base64image = canvas.toDataURL("image/png");
+              var anchor = document.createElement('a');
+              anchor.setAttribute("href", base64image);
+              anchor.setAttribute("download", "tableGPE3.png");
+              anchor.click();
+              anchor.remove();
+          });
+        };
+
+        document.getElementById("dr24").onclick = function (){
+          const screenshotTarget = document.getElementById('r24');
+
+          html2canvas(screenshotTarget).then((canvas)=> {
+              const base64image = canvas.toDataURL("image/png");
+              var anchor = document.createElement('a');
+              anchor.setAttribute("href", base64image);
+              anchor.setAttribute("download", "tableGPE4.png");
+              anchor.click();
+              anchor.remove();
+          });
+        };
+    </script>
+    <script src="html2canvas.min.js"></script>
+
+
+
+    <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
+</body>
+</html>

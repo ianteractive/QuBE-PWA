@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"><html>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400&family=Rubik&display=swap" rel="stylesheet">
+
+    <style type="text/css">
+        ion-icon{
+            cursor: pointer;
+            font-size: 19px;
+            color:rgb(60, 95, 24);
+        }
+        body{
+            font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        button{
+            margin: auto;
+            border: 1px solid black;
+            background : teal;
+            width: 75px;
+            height: 30px;
+            text-align: center;
+            color:#fff;
+            border-radius: 5px;
+            cursor: pointer;
+            box-shadow: 0 0 10px rgb(0,0,0,0.1);
+            -webkit-transition-duration: 0.3s;
+            transition-duration: 0.3s;
+            -webkit-transition-property: box-shadow, transform;
+            transition-property: box-shadow, transform;
+        }
+        button:hover, button:focus, button:active{
+            box-shadow: 0 0 10px rgba(0,0,0,0.5);
+            -webkit-transform: scale(1.1);
+            transform: scale(1.1);
+        }
+        .tble{
+            border:3px solid black;
+            border-collapse: collapse;
+            background-color: rgb(242, 253, 253);
+        }
+        canvas {
+            margin-top: 10px;
+        }
+        .tools {
+            justify-content: center;
+            margin-top: 25px;
+        }
+        .tools .color-field {
+            height: 40px;
+            width: 40px;
+            min-width: 40px;
+            min-height: 40px;
+            cursor: pointer;
+            display: inline-block;
+            box-sizing: border-box;
+            border-radius: 50%;
+            border: 2px solid white;
+        }
+        .tools .button {
+            align-self: center;
+            width: 100px;
+            height: 40px;
+            border: 2px solid #222;
+            cursor: pointer;
+            color: white;
+            background: teal;
+        }
+        a {
+            text-decoration: none;
+            color: #fff;
+            cursor: pointer;
+            padding: 10px 10px;
+
+        }
+
+    </style>
+    
+    <title>Truth Table</title>
+    </head>
+    <body>
+       <p><big> Custom Table </big><i>(Maximum of 12 rows and 12 colums)</i>&nbsp;&nbsp;&nbsp;
+        <label><input type="number" id="row" placeholder="Rows" min="1" max="12"></input> &nbsp;</label>
+        <label><input type="number" id="col" placeholder="Column" min="1" max="100"></input> &nbsp;&nbsp;</label>
+       
+        <button type="button" onclick="table()"> Create </button>
+        <button type="button"><a href="../Qube.html">Home</a></button>
+        <span style="padding-left:500px">
+        Download
+        <ion-icon name="download-outline" id="download4"></ion-icon></span>
+        </p>
+        <hr>
+       <span id="t"></span>
+       <canvas id="canvas"></canvas>
+       <label for="uploader">Select File</label>
+       <input type="file" id="uploader">
+       <div class="tools">
+            <button onClick="undo_last()" type="button" class="button">Undo</button>
+            <button onClick="clear_canvas()" type="button" class="button">Clear</button>
+
+            <div onClick="change_color(this)" class="color-field" style="background: black;"></div>
+            <div onClick="change_color(this)" class="color-field" style="background: blue;"></div>
+            <div onClick="change_color(this)" class="color-field" style="background: red;"></div>
+            <div onClick="change_color(this)" class="color-field" style="background: rgb(242, 253, 253); border: 1px solid #222; border-radius: 3px;"></div>
+
+            <input onInput="draw_color = this.value" type="color" class="color-picker">
+            <input onInput="draw_width = this.value" type="range" min="1" max="10" value="2" class="pen-range">
+       </div>
+
+
+       <script>
+           const canvas = document.getElementById('canvas');
+           const ctx = canvas.getContext('2d');
+
+           const reader = new FileReader();
+           const img = new Image();
+
+           const uploadImage = (e) => {
+               reader.onload = () => {
+                   img.onload = () => {
+                       canvas.width = img.width;
+                       canvas.height = img.height;
+                       ctx.drawImage(img, 0, 0);
+                   };
+                   img.src = reader.result;
+               };
+               reader.readAsDataURL(e.target.files[0])
+           };
+           const imageLoader = document.getElementById('uploader');
+           imageLoader.addEventListener('change', uploadImage); 
+
+           let draw_color = "black";
+           let draw_width = "2";
+           let is_drawing = false;
+
+           let restore_array = [];
+           let index = -1;
+
+           canvas.addEventListener("touchstart", start, false);
+           canvas.addEventListener("touchmove", draw, false);
+           canvas.addEventListener("mousedown", start, false);
+           canvas.addEventListener("mousemove", draw, false);
+           
+           canvas.addEventListener("touchend", stop, false);
+           canvas.addEventListener("mouseup", stop, false);
+           canvas.addEventListener("mouseout", stop, false);
+
+
+
+           function start(event) {
+               is_drawing = true;
+               ctx.beginPath();
+               ctx.moveTo(event.clientX - canvas.offsetLeft, event.clientY - canvas.offsetTop);
+               event.preventDefault();
+           }
+
+           function draw(event){
+               if(is_drawing) {
+                   ctx.lineTo(event.clientX - canvas.offsetLeft, event.clientY - canvas.offsetTop);
+                   ctx.strokeStyle = draw_color;
+                   ctx.lineWidth = draw_width;
+                   ctx.lineCap = "round";
+                   ctx.lineJoin = "round";
+                   ctx.stroke();
+               }
+           }
+
+           function stop(event) {
+               if(is_drawing){
+                   ctx.stroke();
+                   ctx.closePath();
+                   is_drawing = false;
+               }
+               event.preventDefault();
+            
+               if(event.type != 'mouseout'){
+                restore_array.push(ctx.getImageData(0, 0, canvas.width, canvas.height));
+                index += 1;
+               }
+               
+           }
+
+           function change_color(element) {
+                draw_color =element.style.background;
+           }
+
+           function clear_canvas(){
+               ctx.clearRect(0, 0, canvas.width, canvas.height);
+               restore_array = [];
+               index = -1;
+               document.location.reload(true);
+           }
+
+           function undo_last(){
+                if( index <= 0 ){
+                    clear_canvas();
+                } else {
+                    index -= 1;
+                    restore_array.pop();
+                    ctx.putImageData(restore_array[index], 0, 0);
+                }
+           }
+
+
+           function table(){
+               var r, c, t;
+
+               r = document.getElementById("row").value;
+                c = document.getElementById("col").value;
+
+               if(r >= 1 && r <= 12){
+                   if(c >= 1 && c <=12){
+
+                    if (r < 6){
+                        if (c < 4){
+
+                            t= "<table class='tble' border='1px' height='175' width='500'>";
+                            for(var rl = 1; rl <= r; rl++){
+                                    t +="<tr>";
+                                 for(var cl = 1; cl <= c; cl++){
+                                     t+= "<td> </td>";
+                                    }
+                                t +="</tr>";
+                                }
+                            t+="</table>"; 
+                        document.getElementById("t").innerHTML= t;
+
+                        } else if (c < 6 && c >=4 ){
+
+                            t= "<table class='tble' border='1px' height='200' width='750'>";
+                            for(var rl = 1; rl <= r; rl++){
+                                    t +="<tr>";
+                                 for(var cl = 1; cl <= c; cl++){
+                                     t+= "<td> </td>";
+                                    }
+                                t +="</tr>";
+                                }
+                            t+="</table>"; 
+                        document.getElementById("t").innerHTML= t;
+
+                        } else if (c >= 6 && c < 9){
+
+                            t= "<table class='tble' border='1px' height='250' width='1500'>";
+                            for(var rl = 1; rl <= r; rl++){
+                                    t +="<tr>";
+                                 for(var cl = 1; cl <= c; cl++){
+                                     t+= "<td> </td>";
+                                    }
+                                t +="</tr>";
+                                }
+                            t+="</table>"; 
+                        document.getElementById("t").innerHTML= t;
+
+                        } else {
+
+                            t= "<table class='tble' border='1px' height='300' width='1500'>";
+                            for(var rl = 1; rl <= r; rl++){
+                                    t +="<tr>";
+                                for(var cl = 1; cl <= c; cl++){
+                                    t+= "<td> </td>";
+                                    }
+                                t +="</tr>";
+                                }
+                            t+="</table>"; 
+                            document.getElementById("t").innerHTML= t;
+                        }
+                    } else if (r >=6 && r < 10) {
+                        if (c < 6){
+
+                            t= "<table class='tble' border='1px' height='400' width='750'>";
+                            for(var rl = 1; rl <= r; rl++){
+                                    t +="<tr>";
+                                for(var cl = 1; cl <= c; cl++){
+                                    t+= "<td> </td>";
+                                    }
+                                t +="</tr>";
+                                }
+                            t+="</table>"; 
+                            document.getElementById("t").innerHTML= t;
+
+                            } else if (c >= 6 && c < 9){
+
+                            t= "<table class='tble' border='1px' height='500' width='900'>";
+                            for(var rl = 1; rl <= r; rl++){
+                                    t +="<tr>";
+                                for(var cl = 1; cl <= c; cl++){
+                                    t+= "<td> </td>";
+                                    }
+                                t +="</tr>";
+                                }
+                            t+="</table>"; 
+                            document.getElementById("t").innerHTML= t;
+
+                            } else {
+
+                            t= "<table class='tble' border='1px' height='500' width='1200'>";
+                            for(var rl = 1; rl <= r; rl++){
+                                    t +="<tr>";
+                                for(var cl = 1; cl <= c; cl++){
+                                    t+= "<td> </td>";
+                                    }
+                                t +="</tr>";
+                                }
+                            t+="</table>"; 
+                            document.getElementById("t").innerHTML= t;
+                            }
+                    } else {
+
+                        if (c < 4){
+
+                            t= "<table class='tble' border='1px' height='600' width='500'>";
+                            for(var rl = 1; rl <= r; rl++){
+                                    t +="<tr>";
+                                 for(var cl = 1; cl <= c; cl++){
+                                     t+= "<td> </td>";
+                                    }
+                                t +="</tr>";
+                                }
+                            t+="</table>"; 
+                        document.getElementById("t").innerHTML= t;
+
+                        } else if (c < 6 && c >=4){
+
+                            t= "<table class='tble' border='1px' height='600' width='750'>";
+                            for(var rl = 1; rl <= r; rl++){
+                                    t +="<tr>";
+                                 for(var cl = 1; cl <= c; cl++){
+                                     t+= "<td> </td>";
+                                    }
+                                t +="</tr>";
+                                }
+                            t+="</table>"; 
+                        document.getElementById("t").innerHTML= t;
+                            
+                        } else if (c >= 6 && c <= 9){
+
+                            t= "<table class='tble' border='1px' height='600' width='750'>";
+                            for(var rl = 1; rl <= r; rl++){
+                                    t +="<tr>";
+                                 for(var cl = 1; cl <= c; cl++){
+                                     t+= "<td> </td>";
+                                    }
+                                t +="</tr>";
+                                }
+                            t+="</table>"; 
+                        document.getElementById("t").innerHTML= t;
+                        
+                        } else if (c > 9 && c < 12) {
+
+                            t= "<table class='tble' border='1px' height='600' width='1000'>";
+                                for(var rl = 1; rl <= r; rl++){
+                                        t +="<tr>";
+                                    for(var cl = 1; cl <= c; cl++){
+                                        t+= "<td> </td>";
+                                        }
+                                    t +="</tr>";
+                                    }
+                                t+="</table>"; 
+                            document.getElementById("t").innerHTML= t;
+
+                        } else 
+
+                            t= "<table class='tble' border='1px' height='500' width='1300'>";
+                                for(var rl = 1; rl <= r; rl++){
+                                        t +="<tr>";
+                                    for(var cl = 1; cl <= c; cl++){
+                                        t+= "<td> </td>";
+                                        }
+                                    t +="</tr>";
+                                    }
+                                t+="</table>"; 
+                            document.getElementById("t").innerHTML= t;
+                    }
+                 }else 
+                   alert("Out of Range Input(s), Please try Again!");
+               }else
+               alert("Out of Range Input(s), Please Try again!");
+           }
+       </script>
+       <script src="html2canvas.min.js"></script>
+       <script>
+           document.getElementById("download4").onclick = function (){
+             const screenshotTarget = document.getElementById('t');
+ 
+             html2canvas(screenshotTarget).then((canvas)=> {
+                 const base64image = canvas.toDataURL("image/png");
+                 var anchor = document.createElement('a');
+                 anchor.setAttribute("href", base64image);
+                 anchor.setAttribute("download", "customtable.png");
+                 anchor.click();
+                 anchor.remove();
+             });
+           };
+       </script>
+       <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
+       <script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
+
+
+    </body>
+            
+</html>
